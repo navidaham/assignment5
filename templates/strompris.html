@@ -34,30 +34,69 @@
         background-color: #193498;
         color: white;
       }
-    </style>
-    <script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm//vega@5"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm//vega-lite@5.6.0"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm//vega-embed@6"
-    ></script>
-  </head>
-  <body>
-    <!-- Add Navigation Bar with links to docs (both FastAPI and your sphinx docs)
-    -->
+  
+          /* Style header */
+    .header {
+      padding: 10px;
+      text-align: center;
+      background: #f6f6f8;
+      color: black;
+      font-size: 20px;
+    }
 
-    <div id="vis"></div>
-    <!-- Create Form -->
-    <form action="javascript:refreshPlot()" id="price-form">
-      <!--
-      -->
-    </form>
+    /* box for inputs and checkbox */
+    .box {
+      margin-top: 20px;
+      display: block;
+      position: absolute;
+      margin-bottom: 5px;
+    }
+
+    .refresh-button {
+      margin-left: 10px;
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-lite@5.6.0"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-embed@6"></script>
+</head>
+
+<body>
+  <!-- Navigation Bar. -->
+  <div class="topnav">
+    <a class="active" href="/">Home</a>
+    <a href="/docs">FastAPI Docs</a>
+    <a href="/help">Help</a>
+  </div>
+
+  <div class="header">
+    <h1>strompris.no</h1>
+    <p>Welcome to strompris.no</p>
+  </div>
+
+  <div id="vis"></div>
+  <!-- Form -->
+  <form action="javascript:refreshPlot()" id="price-form">
+    <legend>Choose end-date, number of previous days and area of interest:</legend>
+    <!-- input date -->
+    <label>
+      <input type="date" id="end" name="end" value="{{ today }}" max="{{ today }}" required>
+    </label>
+    <!-- input number of days box -->
+    <label>
+      <input type="number" id="days" name="days" value="7" min="1" max="7" required>
+    </label>
+    <!-- checkbox for locations -->
+    <label class="box">
+      <input type="checkbox" id="locations" name="locations" value="NO1" /> Oslo
+      <input type="checkbox" id="locations" name="locations" value="NO2" /> Kristiansand
+      <input type="checkbox" id="locations" name="locations" value="NO3" /> Trondheim
+      <input type="checkbox" id="locations" name="locations" value="NO4" /> Tromsø
+      <input type="checkbox" id="locations" name="locations" value="NO5" /> Bergen
+    </label>
+    <button type="submit">Refresh</button>
+  </form>
 
     <script type="text/javascript">
       async function refreshPlot() {

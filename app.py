@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import datetime
 import os
+from typing import List, Optional
 
 import altair as alt
 from fastapi import FastAPI, Query, Request
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 from strompris import (
     ACTIVITIES,
@@ -21,17 +23,26 @@ from strompris import (
 )
 
 app = FastAPI()
-templates = ...
+templates = Jinja2Templates(directory="templates")
 
+@app.get("/", response_class=HTMLResponse)
+def read_item(request: Request,
+              date: datetime.date = datetime.date.today(),
+              locations: list[str] = Query(list(LOCATION_CODES.keys()))):
+    """Render the 'strompris.html' template with given inputs """
 
-# `GET /` should render the `strompris.html` template
-# with inputs:
-# - request
-# - location_codes: location code dict
-# - today: current date
+    return templates.TemplateResponse("strompris.html", {"request": request,"locations": locations, "today": date})
 
+@app.get("/plot_prices.json")
+def get_plot_prices_json(locations: list[str] = Query(list(LOCATION_CODES.keys())),
+                        end: datetime.date=datetime.date.today(), days: int = 7) -> dict:
+    """Plot the result of given inputs from user. All inputs are optional"""
 
-...
+    prices_df = fetch_prices(end_date=end, days=days, locations=locations)
+    Chart = plot_prices(prices_df)
+
+    # Returns a vega-lite JSON chart
+    return Chart.to_dict()
 
 
 # GET /plot_prices.json should take inputs:
@@ -78,7 +89,8 @@ templates = ...
 def main():
     """Launches the application on port 5000 with uvicorn"""
     # use uvicorn to launch your application on port 5000
-    ...
+    import uvicorn
+    uvicorn.run(app, port=5000)
 
 
 if __name__ == "__main__":

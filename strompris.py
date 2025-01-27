@@ -30,19 +30,25 @@ warnings.filterwarnings("ignore", ".*convert_dtype.*", FutureWarning)
 def fetch_day_prices(date: datetime.date = None, location: str = "NO1") -> pd.DataFrame:
     """Fetch one day of data for one location from hvakosterstrommen.no API
 
-    Make sure to document arguments and return value...
-    ...
     """
     if date is None:
-        date = ...
+        date = datetime.date.today()
 
-    raise NotImplementedError("Remove me when you implement this task")
-    url = ...
-    ...
+    url = f"https://www.hvakosterstrommen.no/api/v1/prices/{date.year}/{date.month:02d}-{date.day:02d}_{location}.json"
+    response = requests.get(url)
+    # Parse the json reponse
+    date = response.json()
+    df = pd.DataFrame(date)
+
+    # Convert the 'time_start' column to datetime format
+    df['time_start'] = pd.to_datetime(df['time_start'])
+
+    return df[['NOK_per_kWh', 'time_start']]
 
 
 # LOCATION_CODES maps codes ("NO1") to names ("Oslo")
-LOCATION_CODES = {}
+LOCATION_CODES = {"NO1": "Oslo", "NO2": "Kristiansand",
+                  "NO3": "Trondheim", "NO4": "Tromsø", "NO5": "Bergen"}
 
 # task 1:
 
@@ -52,33 +58,55 @@ def fetch_prices(
     days: int = 7,
     locations: list[str] = tuple(LOCATION_CODES.keys()),
 ) -> pd.DataFrame:
-    """Fetch prices for multiple days and locations into a single DataFrame
+    """Takes a given time, number of days and locations and
+    generates the prices for multiple days and locatons into a single
+    DataFrame.
 
-    Make sure to document arguments and return value...
-    ...
     """
-    raise NotImplementedError("Remove me when you implement this task")
 
     if end_date is None:
-        end_date = ...
+        end_date = datetime.date.today()
 
-    ...
+    # Initialize an empty DataFrame to store the results
+    result_df = pd.DataFrame()
+
+    for location in locations:
+        for i in range(days):
+            date = end_date - datetime.timedelta(i)
+            prices_df = fetch_day_prices(date, location)
+
+            # Add location code and name columns
+            prices_df['location_code'] = location
+            prices_df['location'] = LOCATION_CODES[location]
+
+            result_df = pd.concat([result_df, prices_df], ignore_index=True)
+
+    return result_df
 
 
 # task 5.1:
 
 
 def plot_prices(df: pd.DataFrame) -> alt.Chart:
-    """Plot energy prices over time
-
-    x-axis should be time_start
-    y-axis should be price in NOK
-    each location should get its own line
-
-    Make sure to document arguments and return value...
+    """Generate an Altair line chart to visualize
+    energy prices over time. Each location is represented by a separate line 
+    on the chart. The x-axis consist of time_start, the y-axis is the price in
+    NOK.
+    
     """
-    raise NotImplementedError("Remove me when you implement this task")
-    ...
+    chart = alt.Chart(df).mark_line().encode(
+        x='time_start:T',
+        y='NOK_per_kWh:Q',
+        color='location:N',
+        tooltip=['location', 'time_start', alt.Tooltip(
+            'NOK_per_kWh:Q', format='.2f', title='Price (NOK/kWh)')]
+    ).properties(
+        title='Electricity Prices Over Time',
+        width=800,
+        height=400
+    )
+
+    return chart
 
 
 # Task 5.4
