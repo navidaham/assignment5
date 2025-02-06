@@ -1,4 +1,6 @@
 
+---- This is a project that was part of the course 'Problem Solving with High-Level Languages' at the university of Oslo fall 2023 ---
+
 Strompris is a project that plots the electricity prices in Norway
 using the Hva Koster Strømmen API: https://www.hvakosterstrommen.no/strompris-api.
 
